@@ -5,55 +5,24 @@
   <title>UPSC Advanced Knowledge Base</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <!-- Docsify Base Theme -->
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/docsify@4/lib/themes/vue.css">
+  <!-- Dynamic Base Theme (Defaults to Vue) -->
+  <link id="docsify-theme-css" rel="stylesheet" href="https://cdn.jsdelivr.net/npm/docsify@4/lib/themes/vue.css">
   
-  <!-- FEATURE: Dark/Light Mode Theme CSS -->
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/docsify-darklight-theme@3/dist/style.min.css" title="docsify-darklight-theme" type="text/css" />
-
   <style>
-    /* FEATURE: Styling for our custom local font selector */
-    #custom-font-controls {
-      position: fixed;
-      top: 20px;
-      right: 80px; /* Leaves room for the dark mode toggle */
-      z-index: 999;
+    /* Force Content to 95% Width for wide screens and mobile */
+    .markdown-section {
+      max-width: 95% !important;
+      margin: 0 auto !important;
     }
-    
-    #font-selector {
-      padding: 5px 10px;
-      border: 1px solid #ccc;
-      border-radius: 4px;
-      font-size: 13px;
-      background-color: var(--theme-color, #fff); /* Adapts slightly to dark mode */
-      color: var(--textColor, #333);
-      cursor: pointer;
-      outline: none;
-    }
-    
-    /* Ensure the body transition is smooth when changing fonts/colors */
+
+    /* Ensure smooth transitions when changing themes/colors */
     body {
-      transition: background-color 0.3s, color 0.3s, font-family 0.2s;
+      transition: background-color 0.3s, color 0.3s;
     }
   </style>
 </head>
 <body>
   
-  <!-- FEATURE: Local Font Selection Dropdown -->
-  <div id="custom-font-controls">
-    <select id="font-selector" onchange="changeLocalFont(this.value)">
-      <option value="system-ui, -apple-system, sans-serif">System Default</option>
-      <option disabled>──────────</option>
-      <option value="'Times New Roman', Times, serif">Times New Roman (Serif)</option>
-      <option value="Georgia, serif">Georgia (Serif)</option>
-      <option disabled>──────────</option>
-      <option value="Arial, Helvetica, sans-serif">Arial (Sans)</option>
-      <option value="Verdana, sans-serif">Verdana (Sans)</option>
-      <option disabled>──────────</option>
-      <option value="'Courier New', Courier, monospace">Courier (Mono)</option>
-    </select>
-  </div>
-
   <div id="app">Initialising UPSC Vault Engine...</div>
   
   <script>
@@ -65,48 +34,100 @@
       search: 'auto',
       placeholder: 'Search syllabus topics...',
       
-      // Configuration for the Dark/Light Plugin
-      darklightTheme: {
-        siteFont: "inherit",
-        defaultTheme: 'light',
-        codeFontFamily: 'Roboto Mono, Monaco, courier, monospace',
-        dark: {
-          background: '#1c2022',
-          toggleBtnBg: '#34495e',
-          textColor: '#b4b4b4'
-        },
-        light: {
-          background: 'white',
-          toggleBtnBg: 'var(--theme-color)',
-          textColor: 'var(--theme-color)'
+      count: { countable: true, fontsize: '0.85em', color: 'rgb(90,90,90)' },
+      progress: { position: "top", color: "var(--theme-color,#42b983)", height: "3px" },
+      scrollToTop: { auto: true, text: '⬆', right: 20, bottom: 20, offset: 500 },
+
+      // FEATURE: Custom Plugin to inject preferences directly into the sidebar
+      plugins: [
+        function(hook, vm) {
+          hook.ready(function() {
+            const sidebar = document.querySelector('.sidebar');
+            
+            // The HTML for the sidebar controls
+            const controlsHtml = `
+              <div id="sidebar-controls" style="padding: 20px; border-top: 1px solid rgba(128,128,128,0.2); margin-top: 10px; margin-bottom: 30px;">
+                <div style="font-size: 11px; font-weight: bold; text-transform: uppercase; color: var(--theme-color); margin-bottom: 12px; letter-spacing: 1px;">Preferences</div>
+                
+                <div style="margin-bottom: 12px;">
+                  <div style="font-size: 11px; margin-bottom: 4px; font-weight: bold;">Accent Color</div>
+                  <input type="color" id="color-picker" onchange="changeThemeColor(this.value)" style="width: 100%; height: 28px; border: 1px solid rgba(128,128,128,0.3); border-radius: 4px; cursor: pointer; padding: 0;">
+                </div>
+
+                <div style="margin-bottom: 12px;">
+                  <div style="font-size: 11px; margin-bottom: 4px; font-weight: bold;">Base Theme</div>
+                  <select id="theme-selector" onchange="changeBaseTheme(this.value)" style="width: 100%; padding: 4px; font-size: 12px; border-radius: 4px; border: 1px solid rgba(128,128,128,0.3); background: transparent; color: inherit; cursor: pointer;">
+                    <option value="vue" style="color: #333;">Vue (Default Light)</option>
+                    <option value="buble" style="color: #333;">Buble (Clean Light)</option>
+                    <option value="pure" style="color: #333;">Pure (Minimalist)</option>
+                    <option value="dark" style="color: #333;">Dark (Night Mode)</option>
+                  </select>
+                </div>
+
+                <div>
+                  <div style="font-size: 11px; margin-bottom: 4px; font-weight: bold;">Typography</div>
+                  <select id="font-selector" onchange="changeLocalFont(this.value)" style="width: 100%; padding: 4px; font-size: 12px; border-radius: 4px; border: 1px solid rgba(128,128,128,0.3); background: transparent; color: inherit; cursor: pointer;">
+                    <option value="system-ui, -apple-system, sans-serif" style="color: #333;">System Default</option>
+                    <option value="'Times New Roman', Times, serif" style="color: #333;">Serif (Textbook)</option>
+                    <option value="Arial, Helvetica, sans-serif" style="color: #333;">Sans (Modern)</option>
+                  </select>
+                </div>
+              </div>
+            `;
+            
+            // Append the block to the very bottom of the sidebar
+            sidebar.insertAdjacentHTML('beforeend', controlsHtml);
+
+            // Hydrate the inputs with saved preferences from local storage
+            const savedTheme = localStorage.getItem('upsc_base_theme') || 'vue';
+            const savedColor = localStorage.getItem('upsc_accent_color') || '#42b983';
+            const savedFont = localStorage.getItem('upsc_vault_font') || 'system-ui, -apple-system, sans-serif';
+
+            document.getElementById('theme-selector').value = savedTheme;
+            document.getElementById('color-picker').value = savedColor;
+            document.getElementById('font-selector').value = savedFont;
+          });
         }
-      }
+      ]
     }
 
-    // FEATURE: Javascript to handle the Local Font change
+    // --- CUSTOM PREFERENCE JAVASCRIPT ---
+
+    function changeBaseTheme(themeName) {
+      const linkTag = document.getElementById('docsify-theme-css');
+      linkTag.href = `https://cdn.jsdelivr.net/npm/docsify@4/lib/themes/${themeName}.css`;
+      localStorage.setItem('upsc_base_theme', themeName);
+    }
+
+    function changeThemeColor(hexColor) {
+      document.documentElement.style.setProperty('--theme-color', hexColor);
+      localStorage.setItem('upsc_accent_color', hexColor);
+    }
+
     function changeLocalFont(fontFamily) {
-      // Overrides the body font. Uses native CSS specificity.
       document.body.style.setProperty('font-family', fontFamily, 'important');
-      // Save to local storage so it remembers your font choice on reload
       localStorage.setItem('upsc_vault_font', fontFamily);
     }
 
-    // On page load, check if the user previously selected a font
+    // Apply saved preferences immediately on page load (before sidebar renders)
     window.onload = function() {
+      const savedTheme = localStorage.getItem('upsc_base_theme');
+      const savedColor = localStorage.getItem('upsc_accent_color');
       const savedFont = localStorage.getItem('upsc_vault_font');
-      if (savedFont) {
-        document.getElementById('font-selector').value = savedFont;
-        changeLocalFont(savedFont);
-      }
+
+      if (savedTheme) changeBaseTheme(savedTheme);
+      if (savedColor) changeThemeColor(savedColor);
+      if (savedFont) changeLocalFont(savedFont);
     };
   </script>
 
-  <!-- Core Docsify Engine -->
+  <!-- Core Docsify Engine & Plugins -->
   <script src="https://cdn.jsdelivr.net/npm/docsify@4"></script>
   <script src="https://cdn.jsdelivr.net/npm/docsify@4/lib/plugins/search.min.js"></script>
-  
-  <!-- FEATURE: Dark/Light Mode Theme Javascript -->
-  <script src="https://cdn.jsdelivr.net/npm/docsify-darklight-theme@3/dist/index.min.js" type="text/javascript"></script>
+  <script src="https://cdn.jsdelivr.net/npm/docsify/lib/plugins/zoom-image.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/docsify-count@latest/dist/countable.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/docsify-progress@latest/dist/progress.min.js"></script>
+  <script src="https://unpkg.com/docsify-scroll-to-top/dist/docsify-scroll-to-top.min.js"></script>
   
 </body>
 </html>

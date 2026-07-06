@@ -1,0 +1,2 @@
+# notes
+static notes collection

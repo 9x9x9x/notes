@@ -29,6 +29,17 @@
     // Configuration for the Docsify Engine
     window.$docsify = {
       name: 'UPSC Static Vault',
+      
+      // =========================================
+      // NEW: Activate Coverpage and Navbar
+      // =========================================
+      coverpage: true,
+      loadNavbar: true,
+      
+      // Makes the coverpage independent (scrolling down doesn't reveal the site, 
+      // you MUST click the 'Enter Vault' button to proceed).
+      onlyCover: false, 
+      
       loadSidebar: true,
       subMaxLevel: 2,
       search: 'auto',
@@ -38,7 +49,6 @@
       progress: { position: "top", color: "var(--theme-color,#42b983)", height: "3px" },
       scrollToTop: { auto: true, text: '⬆', right: 20, bottom: 20, offset: 500 },
 
-      // FEATURE: Custom Plugin to inject preferences directly into the sidebar
       plugins: [
         function(hook, vm) {
           hook.ready(function() {
@@ -75,10 +85,8 @@
               </div>
             `;
             
-            // Append the block to the very bottom of the sidebar
             sidebar.insertAdjacentHTML('beforeend', controlsHtml);
 
-            // Hydrate the inputs with saved preferences from local storage
             const savedTheme = localStorage.getItem('upsc_base_theme') || 'vue';
             const savedColor = localStorage.getItem('upsc_accent_color') || '#42b983';
             const savedFont = localStorage.getItem('upsc_vault_font') || 'system-ui, -apple-system, sans-serif';
@@ -90,8 +98,6 @@
         }
       ]
     }
-
-    // --- CUSTOM PREFERENCE JAVASCRIPT ---
 
     function changeBaseTheme(themeName) {
       const linkTag = document.getElementById('docsify-theme-css');
@@ -109,7 +115,6 @@
       localStorage.setItem('upsc_vault_font', fontFamily);
     }
 
-    // Apply saved preferences immediately on page load (before sidebar renders)
     window.onload = function() {
       const savedTheme = localStorage.getItem('upsc_base_theme');
       const savedColor = localStorage.getItem('upsc_accent_color');

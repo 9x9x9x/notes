@@ -4,31 +4,109 @@
   <meta charset="UTF-8">
   <title>UPSC Advanced Knowledge Base</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <!-- Docsify Base Theme -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/docsify@4/lib/themes/vue.css">
+  
+  <!-- FEATURE: Dark/Light Mode Theme CSS -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/docsify-darklight-theme@3/dist/style.min.css" title="docsify-darklight-theme" type="text/css" />
+
+  <style>
+    /* FEATURE: Styling for our custom local font selector */
+    #custom-font-controls {
+      position: fixed;
+      top: 20px;
+      right: 80px; /* Leaves room for the dark mode toggle */
+      z-index: 999;
+    }
+    
+    #font-selector {
+      padding: 5px 10px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      font-size: 13px;
+      background-color: var(--theme-color, #fff); /* Adapts slightly to dark mode */
+      color: var(--textColor, #333);
+      cursor: pointer;
+      outline: none;
+    }
+    
+    /* Ensure the body transition is smooth when changing fonts/colors */
+    body {
+      transition: background-color 0.3s, color 0.3s, font-family 0.2s;
+    }
+  </style>
 </head>
 <body>
+  
+  <!-- FEATURE: Local Font Selection Dropdown -->
+  <div id="custom-font-controls">
+    <select id="font-selector" onchange="changeLocalFont(this.value)">
+      <option value="system-ui, -apple-system, sans-serif">System Default</option>
+      <option disabled>──────────</option>
+      <option value="'Times New Roman', Times, serif">Times New Roman (Serif)</option>
+      <option value="Georgia, serif">Georgia (Serif)</option>
+      <option disabled>──────────</option>
+      <option value="Arial, Helvetica, sans-serif">Arial (Sans)</option>
+      <option value="Verdana, sans-serif">Verdana (Sans)</option>
+      <option disabled>──────────</option>
+      <option value="'Courier New', Courier, monospace">Courier (Mono)</option>
+    </select>
+  </div>
+
   <div id="app">Initialising UPSC Vault Engine...</div>
+  
   <script>
+    // Configuration for the Docsify Engine
     window.$docsify = {
       name: 'UPSC Static Vault',
       loadSidebar: true,
-      loadNavbar: true,     // Feature 3: Navbar enabled
-      coverpage: true,      // Feature 2: Coverpage enabled
       subMaxLevel: 2,
       search: 'auto',
       placeholder: 'Search syllabus topics...',
-      // Feature 1: Tab settings
-      tabs: {
-        persist: true,
-        sync: true,
-        theme: 'classic',
-        tabComments: true,
-        tabHeadings: true
+      
+      // Configuration for the Dark/Light Plugin
+      darklightTheme: {
+        siteFont: "inherit",
+        defaultTheme: 'light',
+        codeFontFamily: 'Roboto Mono, Monaco, courier, monospace',
+        dark: {
+          background: '#1c2022',
+          toggleBtnBg: '#34495e',
+          textColor: '#b4b4b4'
+        },
+        light: {
+          background: 'white',
+          toggleBtnBg: 'var(--theme-color)',
+          textColor: 'var(--theme-color)'
+        }
       }
     }
+
+    // FEATURE: Javascript to handle the Local Font change
+    function changeLocalFont(fontFamily) {
+      // Overrides the body font. Uses native CSS specificity.
+      document.body.style.setProperty('font-family', fontFamily, 'important');
+      // Save to local storage so it remembers your font choice on reload
+      localStorage.setItem('upsc_vault_font', fontFamily);
+    }
+
+    // On page load, check if the user previously selected a font
+    window.onload = function() {
+      const savedFont = localStorage.getItem('upsc_vault_font');
+      if (savedFont) {
+        document.getElementById('font-selector').value = savedFont;
+        changeLocalFont(savedFont);
+      }
+    };
   </script>
+
+  <!-- Core Docsify Engine -->
   <script src="https://cdn.jsdelivr.net/npm/docsify@4"></script>
   <script src="https://cdn.jsdelivr.net/npm/docsify@4/lib/plugins/search.min.js"></script>
   
-  <script src="https://cdn.jsdelivr.net/npm/docsify-tabs@1"></script> <script src="https://cdn.jsdelivr.net/npm/docsify-pagination/dist/docsify-pagination.min.js"></script> <script src="https://cdn.jsdelivr.net/npm/docsify-copy-code/dist/docsify-copy-code.min.js"></script> </body>
+  <!-- FEATURE: Dark/Light Mode Theme Javascript -->
+  <script src="https://cdn.jsdelivr.net/npm/docsify-darklight-theme@3/dist/index.min.js" type="text/javascript"></script>
+  
+</body>
 </html>
